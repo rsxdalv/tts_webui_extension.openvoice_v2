@@ -43,29 +43,13 @@ def extension__tts_generation_webui():
 
 
 def ensure_model_downloaded(repo_id, filename, local_dir):
-    """
-    Download a specific file from a Hugging Face repository if it doesn't exist locally.
-
-    Args:
-        repo_id (str): The Hugging Face repository ID
-        filename (str): The filename to download
-        local_dir (str): The local directory to save the file to
-
-    Returns:
-        str: The path to the downloaded file
-    """
     from huggingface_hub import hf_hub_download
 
-    # Create the directory if it doesn't exist
-    os.makedirs(local_dir, exist_ok=True)
-
-    # Check if the file already exists
-    local_path = os.path.join(local_dir, os.path.basename(filename))
+    local_path = os.path.join(local_dir, filename)
     if os.path.exists(local_path):
         print(f"File {filename} already exists at {local_path}")
         return local_path
 
-    # Download the file
     print(f"Downloading {filename} from {repo_id} to {local_dir}...")
     return hf_hub_download(
         repo_id=repo_id,
@@ -74,49 +58,40 @@ def ensure_model_downloaded(repo_id, filename, local_dir):
         local_dir_use_symlinks=False
     )
 
-def download_model():
-    """Download individual OpenVoice model files if not already present"""
-    HUGGINGFACE_REPO = "camenduru/OpenVoice"
-    model_dir = "checkpoints"
+def download_model(repo_id="camenduru/OpenVoice"):
+    model_dir_base = os.path.join("data", "models", "openvoice")
+    os.makedirs(model_dir_base, exist_ok=True)
 
-    # Create the main directories
-    os.makedirs(os.path.join(model_dir, "base_speakers", "EN"), exist_ok=True)
-    os.makedirs(os.path.join(model_dir, "base_speakers", "ZH"), exist_ok=True)
-    os.makedirs(os.path.join(model_dir, "converter"), exist_ok=True)
-
-    # Download English base speaker files
-    en_dir = os.path.join(model_dir, "base_speakers", "EN")
-    ensure_model_downloaded(HUGGINGFACE_REPO, "base_speakers/EN/config.json", en_dir)
-    ensure_model_downloaded(HUGGINGFACE_REPO, "base_speakers/EN/checkpoint.pth", en_dir)
-    ensure_model_downloaded(HUGGINGFACE_REPO, "base_speakers/EN/en_default_se.pth", en_dir)
-    ensure_model_downloaded(HUGGINGFACE_REPO, "base_speakers/EN/en_style_se.pth", en_dir)
-
-    # Download Chinese base speaker files
-    zh_dir = os.path.join(model_dir, "base_speakers", "ZH")
-    ensure_model_downloaded(HUGGINGFACE_REPO, "base_speakers/ZH/config.json", zh_dir)
-    ensure_model_downloaded(HUGGINGFACE_REPO, "base_speakers/ZH/checkpoint.pth", zh_dir)
-    ensure_model_downloaded(HUGGINGFACE_REPO, "base_speakers/ZH/zh_default_se.pth", zh_dir)
-
-    # Download converter files
-    converter_dir = os.path.join(model_dir, "converter")
-    ensure_model_downloaded(HUGGINGFACE_REPO, "converter/config.json", converter_dir)
-    ensure_model_downloaded(HUGGINGFACE_REPO, "converter/checkpoint.pth", converter_dir)
+    for filename in [
+        "checkpoints/base_speakers/EN/config.json",
+        "checkpoints/base_speakers/EN/checkpoint.pth",
+        "checkpoints/base_speakers/EN/en_default_se.pth",
+        "checkpoints/base_speakers/EN/en_style_se.pth",
+        "checkpoints/base_speakers/ZH/config.json",
+        "checkpoints/base_speakers/ZH/checkpoint.pth",
+        "checkpoints/base_speakers/ZH/zh_default_se.pth",
+        "checkpoints/converter/config.json",
+        "checkpoints/converter/checkpoint.pth",
+    ]:
+        ensure_model_downloaded(repo_id, filename, model_dir_base)
+    return model_dir_base
 
 
 @manage_model_state("openvoice")
-def get_openvoice_models(model_name="openvoice"):
+def get_openvoice_models(model_name="camenduru/OpenVoice"):
     """Load the OpenVoice models"""
     try:
-        download_model()
+        download_model(model_name)
 
         # Import here to avoid loading the model at startup
         from openvoice import se_extractor
         from openvoice.api import BaseSpeakerTTS, ToneColorConverter
 
         # Initialize models
-        en_ckpt_base = 'checkpoints/base_speakers/EN'
-        zh_ckpt_base = 'checkpoints/base_speakers/ZH'
-        ckpt_converter = 'checkpoints/converter'
+        model_dir = "./data/models/openvoice/checkpoints"
+        en_ckpt_base = f"{model_dir}/base_speakers/EN"
+        zh_ckpt_base = f"{model_dir}/base_speakers/ZH"
+        ckpt_converter = f"{model_dir}/converter"
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
         output_dir = 'outputs'
         os.makedirs(output_dir, exist_ok=True)
@@ -176,7 +151,7 @@ def tts(
     **kwargs
 ):
     """Run OpenVoice text-to-speech generation"""
-    models = get_openvoice_models(model_name="openvoice")
+    models = get_openvoice_models(model_name="camenduru/OpenVoice")
 
     # Initialize variables
     text_hint = ''
