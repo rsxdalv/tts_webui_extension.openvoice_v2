@@ -55,8 +55,9 @@ def ensure_model_downloaded(repo_id, filename, local_dir):
         repo_id=repo_id,
         filename=filename,
         local_dir=local_dir,
-        local_dir_use_symlinks=False
+        local_dir_use_symlinks=False,
     )
+
 
 def download_model(repo_id="camenduru/OpenVoice"):
     model_dir_base = os.path.join("data", "models", "openvoice")
@@ -92,28 +93,36 @@ def get_openvoice_models(model_name="camenduru/OpenVoice"):
         en_ckpt_base = f"{model_dir}/base_speakers/EN"
         zh_ckpt_base = f"{model_dir}/base_speakers/ZH"
         ckpt_converter = f"{model_dir}/converter"
-        device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        output_dir = 'outputs'
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        output_dir = "outputs"
         os.makedirs(output_dir, exist_ok=True)
 
         print(f"Loading OpenVoice models on {device}...")
 
         # Load English base speaker TTS
-        en_base_speaker_tts = BaseSpeakerTTS(f'{en_ckpt_base}/config.json', device=device)
-        en_base_speaker_tts.load_ckpt(f'{en_ckpt_base}/checkpoint.pth')
+        en_base_speaker_tts = BaseSpeakerTTS(
+            f"{en_ckpt_base}/config.json", device=device
+        )
+        en_base_speaker_tts.load_ckpt(f"{en_ckpt_base}/checkpoint.pth")
 
         # Load Chinese base speaker TTS
-        zh_base_speaker_tts = BaseSpeakerTTS(f'{zh_ckpt_base}/config.json', device=device)
-        zh_base_speaker_tts.load_ckpt(f'{zh_ckpt_base}/checkpoint.pth')
+        zh_base_speaker_tts = BaseSpeakerTTS(
+            f"{zh_ckpt_base}/config.json", device=device
+        )
+        zh_base_speaker_tts.load_ckpt(f"{zh_ckpt_base}/checkpoint.pth")
 
         # Load tone color converter
-        tone_color_converter = ToneColorConverter(f'{ckpt_converter}/config.json', device=device)
-        tone_color_converter.load_ckpt(f'{ckpt_converter}/checkpoint.pth')
+        tone_color_converter = ToneColorConverter(
+            f"{ckpt_converter}/config.json", device=device
+        )
+        tone_color_converter.load_ckpt(f"{ckpt_converter}/checkpoint.pth")
 
         # Load speaker embeddings
-        en_source_default_se = torch.load(f'{en_ckpt_base}/en_default_se.pth').to(device)
-        en_source_style_se = torch.load(f'{en_ckpt_base}/en_style_se.pth').to(device)
-        zh_source_se = torch.load(f'{zh_ckpt_base}/zh_default_se.pth').to(device)
+        en_source_default_se = torch.load(f"{en_ckpt_base}/en_default_se.pth").to(
+            device
+        )
+        en_source_style_se = torch.load(f"{en_ckpt_base}/en_style_se.pth").to(device)
+        zh_source_se = torch.load(f"{zh_ckpt_base}/zh_default_se.pth").to(device)
 
         print("OpenVoice models loaded successfully")
 
@@ -126,13 +135,15 @@ def get_openvoice_models(model_name="camenduru/OpenVoice"):
             "zh_source_se": zh_source_se,
             "device": device,
             "output_dir": output_dir,
-            "se_extractor": se_extractor
+            "se_extractor": se_extractor,
         }
     except Exception as e:
         print(f"Error loading OpenVoice models: {e}")
         import traceback
+
         traceback.print_exc()
         raise
+
 
 @decorator_extension_outer
 @decorator_apply_torch_seed
@@ -144,18 +155,13 @@ def get_openvoice_models(model_name="camenduru/OpenVoice"):
 @decorator_log_generation
 @decorator_extension_inner
 @log_function_time
-def tts(
-    text: str,
-    style: str,
-    reference_audio: str,
-    **kwargs
-):
+def tts(text: str, style: str, reference_audio: str, **kwargs):
     """Run OpenVoice text-to-speech generation"""
     models = get_openvoice_models(model_name="camenduru/OpenVoice")
 
     # Initialize variables
-    text_hint = ''
-    supported_languages = ['zh', 'en']
+    text_hint = ""
+    supported_languages = ["zh", "en"]
 
     # Detect the input language
     language_predicted = langid.classify(text)[0].strip()
@@ -170,19 +176,29 @@ def tts(
     if language_predicted == "zh":
         tts_model = models["zh_base_speaker_tts"]
         source_se = models["zh_source_se"]
-        language = 'Chinese'
-        if style not in ['default']:
+        language = "Chinese"
+        if style not in ["default"]:
             error_msg = f"The style {style} is not supported for Chinese, which should be in ['default']"
             print(f"[ERROR] {error_msg}")
             raise gr.Error(error_msg)
     else:
         tts_model = models["en_base_speaker_tts"]
-        if style == 'default':
+        if style == "default":
             source_se = models["en_source_default_se"]
         else:
             source_se = models["en_source_style_se"]
-        language = 'English'
-        if style not in ['default', 'whispering', 'shouting', 'excited', 'cheerful', 'terrified', 'angry', 'sad', 'friendly']:
+        language = "English"
+        if style not in [
+            "default",
+            "whispering",
+            "shouting",
+            "excited",
+            "cheerful",
+            "terrified",
+            "angry",
+            "sad",
+            "friendly",
+        ]:
             error_msg = f"The style {style} is not supported for English, which should be in ['default', 'whispering', 'shouting', 'excited', 'cheerful', 'terrified', 'angry', 'sad', 'friendly']"
             print(f"[ERROR] {error_msg}")
             raise gr.Error(error_msg)
@@ -198,8 +214,8 @@ def tts(
         target_se, wavs_folder = models["se_extractor"].get_se(
             reference_audio,
             models["tone_color_converter"],
-            target_dir='processed',
-            vad=True
+            target_dir="processed",
+            vad=True,
         )
     except Exception as e:
         error_msg = f"Get target tone color error: {str(e)}"
@@ -218,13 +234,14 @@ def tts(
         src_se=source_se,
         tgt_se=target_se,
         output_path=save_path,
-        message=encode_message
+        message=encode_message,
     )
 
     print(f"Generation successful, saved to {save_path}")
 
     # Return the audio output
     import soundfile as sf
+
     audio_data, sample_rate = sf.read(save_path)
 
     return {
@@ -243,12 +260,20 @@ def ui():
                 lines=3,
                 label="Text to generate",
                 placeholder="Enter text here...",
-                value=default_text
+                value=default_text,
             )
 
             style = gr.Dropdown(
                 label="Style",
-                choices=['default', 'whispering', 'cheerful', 'terrified', 'angry', 'sad', 'friendly'],
+                choices=[
+                    "default",
+                    "whispering",
+                    "cheerful",
+                    "terrified",
+                    "angry",
+                    "sad",
+                    "friendly",
+                ],
                 value="default",
                 # info="Select a style of output audio for the synthesised speech. (Chinese only supports 'default')"
             )
@@ -263,7 +288,8 @@ def ui():
 
         with gr.Column():
             with gr.Accordion("Information", open=True):
-                gr.Markdown("""
+                gr.Markdown(
+                    """
                 # OpenVoice
 
                 OpenVoice is a versatile instant voice cloning approach that requires only a short audio clip from the reference speaker to replicate their voice and generate speech in multiple languages.
@@ -283,7 +309,8 @@ def ui():
                 ## Supported Languages
                 - English (all styles)
                 - Chinese (only 'default' style)
-                """)
+                """
+                )
 
             with gr.Column():
                 unload_model_button("openvoice")
