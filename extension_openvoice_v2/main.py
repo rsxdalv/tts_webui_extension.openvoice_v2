@@ -120,8 +120,8 @@ def get_openvoice_models(model_name="camenduru/OpenVoice", use_v2=True):
         ckpt_converter = f"{model_dir}/converter"
         ckpt_converter_v2 = f"{model_dir_v2}/converter"
         device = "cuda" if torch.cuda.is_available() else "cpu"
-        output_dir = "outputs"
-        output_dir_v2 = "outputs_v2"
+        output_dir = "temp/openvoice"
+        output_dir_v2 = "temp/openvoice_v2"
         os.makedirs(output_dir, exist_ok=True)
         os.makedirs(output_dir_v2, exist_ok=True)
 
@@ -256,7 +256,7 @@ def tts_v1(text: str, style: str, reference_audio: str, language_code: str = "en
         target_se, _ = models["se_extractor"].get_se(
             reference_audio,
             tone_color_converter,
-            target_dir="processed",
+            target_dir="temp",
             vad=True,
         )
     except Exception as e:
@@ -368,7 +368,7 @@ def tts_v2(text: str, reference_audio: str, language_code: str = "en", speaker_a
         target_se, _ = models["se_extractor"].get_se(
             reference_audio,
             tone_color_converter,
-            target_dir="processed",
+            target_dir="temp",
             vad=True,
         )
     except Exception as e:
