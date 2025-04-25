@@ -11,6 +11,7 @@ setuptools.setup(
     scripts=[],
     install_requires=[
         "MyShell-OpenVoice @ git+https://github.com/rsxdalv/OpenVoice@stable",
+        "MyShell-MeloTTS @ git+https://github.com/rsxdalv/MeloTTS@stable",
         # "langid",
         # "numpy",
         # "torch>=2.0.0",
