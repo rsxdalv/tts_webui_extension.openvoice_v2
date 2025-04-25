@@ -26,10 +26,10 @@ from tts_webui.utils.randomize_seed import randomize_seed_ui
 def extension__tts_generation_webui():
     ui()
     return {
-        "package_name": "extension_openvoice",
-        "name": "OpenVoice",
+        "package_name": "extension_openvoice_v2",
+        "name": "OpenVoice V2",
         "version": "0.0.1",
-        "requirements": "git+https://github.com/rsxdalv/extension_openvoice@main",
+        "requirements": "git+https://github.com/rsxdalv/extension_openvoice_v2@main",
         "description": "OpenVoice: A versatile instant voice cloning approach",
         "extension_type": "interface",
         "extension_class": "text-to-speech",
@@ -37,7 +37,7 @@ def extension__tts_generation_webui():
         "extension_author": "rsxdalv",
         "license": "MIT",
         "website": "https://github.com/myshell-ai/OpenVoice",
-        "extension_website": "https://github.com/rsxdalv/extension_openvoice",
+        "extension_website": "https://github.com/rsxdalv/extension_openvoice_v2",
         "extension_platform_version": "0.0.1",
     }
 
@@ -60,7 +60,7 @@ def ensure_model_downloaded(repo_id, filename, local_dir):
 
 
 def download_model(repo_id="camenduru/OpenVoice"):
-    model_dir_base = os.path.join("data", "models", "openvoice")
+    model_dir_base = os.path.join("data", "models", "openvoice_v2")
     os.makedirs(model_dir_base, exist_ok=True)
 
     for filename in [
@@ -78,7 +78,7 @@ def download_model(repo_id="camenduru/OpenVoice"):
     return model_dir_base
 
 
-@manage_model_state("openvoice")
+@manage_model_state("openvoice_v2")
 def get_openvoice_models(model_name="camenduru/OpenVoice"):
     """Load the OpenVoice models"""
     try:
@@ -89,7 +89,7 @@ def get_openvoice_models(model_name="camenduru/OpenVoice"):
         from openvoice.api import BaseSpeakerTTS, ToneColorConverter
 
         # Initialize models
-        model_dir = "./data/models/openvoice/checkpoints"
+        model_dir = "./data/models/openvoice_v2/checkpoints"
         en_ckpt_base = f"{model_dir}/base_speakers/EN"
         zh_ckpt_base = f"{model_dir}/base_speakers/ZH"
         ckpt_converter = f"{model_dir}/converter"
@@ -149,7 +149,7 @@ def get_openvoice_models(model_name="camenduru/OpenVoice"):
 @decorator_apply_torch_seed
 @decorator_save_metadata
 @decorator_save_wav
-@decorator_add_model_type("openvoice")
+@decorator_add_model_type("openvoice_v2")
 @decorator_add_base_filename
 @decorator_add_date
 @decorator_log_generation
@@ -313,7 +313,7 @@ def ui():
                 )
 
             with gr.Column():
-                unload_model_button("openvoice")
+                unload_model_button("openvoice_v2")
                 seed, randomize_seed_callback = randomize_seed_ui()
 
     with gr.Column():
@@ -340,7 +340,7 @@ def ui():
                 "folder_root": gr.Textbox(visible=False),
             },
         ),
-        api_name="openvoice",
+        api_name="openvoice_v2",
     )
 
 

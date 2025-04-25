@@ -1,4 +1,4 @@
-# Extension adapter for OpenVoice
+# Extension adapter for OpenVoice V2
 
 License - the source code within this repository is licensed under the MIT license.
 This extension integrates OpenVoice into the TTS Generation WebUI.
