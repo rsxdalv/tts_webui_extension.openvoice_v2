@@ -28,7 +28,6 @@ def extension__tts_generation_webui():
     return {
         "package_name": "extension_openvoice_v2",
         "name": "OpenVoice V2",
-        "version": "0.0.2",
         "requirements": "git+https://github.com/rsxdalv/extension_openvoice_v2@main",
         "description": "OpenVoice: A versatile instant voice cloning approach",
         "extension_type": "interface",
