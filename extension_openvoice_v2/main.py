@@ -90,8 +90,16 @@ def download_model(repo_id="camenduru/OpenVoice"):
 
     # Download speaker embeddings for different languages
     speaker_embeddings = [
-        "en-default", "en-us", "en-br", "en-au", "en-india",
-        "es", "fr", "zh", "jp", "kr"
+        "en-default",
+        "en-us",
+        "en-br",
+        "en-au",
+        "en-india",
+        "es",
+        "fr",
+        "zh",
+        "jp",
+        "kr",
     ]
 
     for speaker in speaker_embeddings:
@@ -185,19 +193,33 @@ def get_openvoice_models(model_name="camenduru/OpenVoice", use_v2=True):
                     speaker_embeddings = {}
                     ses_dir = f"{model_dir_v2}/base_speakers/ses"
 
-                    for speaker in ["en-default", "en-us", "en-br", "en-au", "en-india",
-                                   "es", "fr", "zh", "jp", "kr"]:
+                    for speaker in [
+                        "en-default",
+                        "en-us",
+                        "en-br",
+                        "en-au",
+                        "en-india",
+                        "es",
+                        "fr",
+                        "zh",
+                        "jp",
+                        "kr",
+                    ]:
                         try:
-                            speaker_embeddings[speaker] = torch.load(f"{ses_dir}/{speaker}.pth", map_location=device)
+                            speaker_embeddings[speaker] = torch.load(
+                                f"{ses_dir}/{speaker}.pth", map_location=device
+                            )
                             print(f"Loaded speaker embedding for {speaker}")
                         except Exception as e:
-                            print(f"Failed to load speaker embedding for {speaker}: {e}")
+                            print(
+                                f"Failed to load speaker embedding for {speaker}: {e}"
+                            )
 
                     v2_models = {
                         "tone_color_converter_v2": tone_color_converter_v2,
                         "melo_tts_models": melo_tts_models,
                         "speaker_embeddings": speaker_embeddings,
-                        "output_dir_v2": output_dir_v2
+                        "output_dir_v2": output_dir_v2,
                     }
 
                     print("OpenVoice V2 models loaded successfully")
@@ -206,6 +228,7 @@ def get_openvoice_models(model_name="camenduru/OpenVoice", use_v2=True):
             except Exception as e:
                 print(f"Error loading OpenVoice V2 models: {e}")
                 import traceback
+
                 traceback.print_exc()
 
         return {
@@ -218,7 +241,7 @@ def get_openvoice_models(model_name="camenduru/OpenVoice", use_v2=True):
             "device": device,
             "output_dir": output_dir,
             "se_extractor": se_extractor,
-            **v2_models
+            **v2_models,
         }
     except Exception as e:
         print(f"Error loading OpenVoice models: {e}")
@@ -238,7 +261,9 @@ def get_openvoice_models(model_name="camenduru/OpenVoice", use_v2=True):
 @decorator_log_generation
 @decorator_extension_inner
 @log_function_time
-def tts_v1(text: str, style: str, reference_audio: str, language_code: str = "en", **kwargs):
+def tts_v1(
+    text: str, style: str, reference_audio: str, language_code: str = "en", **kwargs
+):
     if not reference_audio:
         raise gr.Error("Please upload a reference audio file")
 
@@ -268,8 +293,8 @@ def tts_v1(text: str, style: str, reference_audio: str, language_code: str = "en
 
     # Determine output paths
     output_dir = models["output_dir"]
-    src_path = f'{output_dir}/tmp.wav'
-    save_path = f'{output_dir}/output.wav'
+    src_path = f"{output_dir}/tmp.wav"
+    save_path = f"{output_dir}/output.wav"
 
     # Use original OpenVoice models
     supported_languages = ["zh", "en"]
@@ -353,7 +378,14 @@ def tts_v1(text: str, style: str, reference_audio: str, language_code: str = "en
 @decorator_log_generation
 @decorator_extension_inner
 @log_function_time
-def tts_v2(text: str, reference_audio: str, language_code: str = "en", speaker_accent: str = "default", speed: float = 1.0, **kwargs):
+def tts_v2(
+    text: str,
+    reference_audio: str,
+    language_code: str = "en",
+    speaker_accent: str = "default",
+    speed: float = 1.0,
+    **kwargs,
+):
     if not reference_audio:
         raise gr.Error("Please upload a reference audio file")
 
@@ -383,8 +415,8 @@ def tts_v2(text: str, reference_audio: str, language_code: str = "en", speaker_a
 
     # Determine output paths
     output_dir = models["output_dir_v2"]
-    src_path = f'{output_dir}/tmp.wav'
-    save_path = f'{output_dir}/output.wav'
+    src_path = f"{output_dir}/tmp.wav"
+    save_path = f"{output_dir}/output.wav"
 
     # Use MeloTTS for V2
     try:
@@ -396,7 +428,7 @@ def tts_v2(text: str, reference_audio: str, language_code: str = "en", speaker_a
             "fr": "FR",
             "zh": "ZH",
             "jp": "JP",
-            "kr": "KR"
+            "kr": "KR",
         }
 
         melo_lang = melo_lang_map.get(language_code.lower(), "EN")
@@ -414,11 +446,13 @@ def tts_v2(text: str, reference_audio: str, language_code: str = "en", speaker_a
 
         # Format speaker key to match the format in speaker_embeddings
         # For non-English languages, we don't use accents
-        if language_code.lower().startswith('en'):
-            speaker_key = f"{language_code.lower()}-{speaker_accent.lower()}".replace('_', '-')
+        if language_code.lower().startswith("en"):
+            speaker_key = f"{language_code.lower()}-{speaker_accent.lower()}".replace(
+                "_", "-"
+            )
         else:
             # For non-English languages, we just use the language code
-            speaker_key = language_code.lower().replace('_', '-')
+            speaker_key = language_code.lower().replace("_", "-")
 
         print(f"Using speaker key: {speaker_key}")
 
@@ -434,17 +468,19 @@ def tts_v2(text: str, reference_audio: str, language_code: str = "en", speaker_a
         # Find the speaker ID
         speaker_id = None
         for spk_key in speaker_ids.keys():
-            if spk_key.lower().replace('_', '-') == speaker_key:
+            if spk_key.lower().replace("_", "-") == speaker_key:
                 speaker_id = speaker_ids[spk_key]
                 break
 
         if speaker_id is None:
             # Use the first available speaker ID as fallback
             speaker_id = list(speaker_ids.values())[0]
-            print(f"Warning: Could not find exact speaker ID for {speaker_key}, using fallback")
+            print(
+                f"Warning: Could not find exact speaker ID for {speaker_key}, using fallback"
+            )
 
         # Generate audio with MeloTTS
-        if torch.backends.mps.is_available() and models["device"] == 'cpu':
+        if torch.backends.mps.is_available() and models["device"] == "cpu":
             torch.backends.mps.is_available = lambda: False
 
         melo_model.tts_to_file(text, speaker_id, src_path, speed=speed)
@@ -454,6 +490,7 @@ def tts_v2(text: str, reference_audio: str, language_code: str = "en", speaker_a
         error_msg = f"Error generating audio with MeloTTS: {str(e)}"
         print(f"[ERROR] {error_msg}")
         import traceback
+
         traceback.print_exc()
         raise gr.Error(error_msg)
 
@@ -495,7 +532,7 @@ def download_unidic():
                 [sys.executable, "-m", "pip", "install", "unidic"],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                text=True
+                text=True,
             )
             install_stdout, install_stderr = install_process.communicate()
 
@@ -510,7 +547,7 @@ def download_unidic():
             [sys.executable, "-m", "unidic", "download"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            text=True
+            text=True,
         )
 
         stdout, stderr = process.communicate()
@@ -558,7 +595,7 @@ def ui():
                             "friendly",
                         ],
                         value="default",
-                        info="Select a style of output audio for the synthesised speech. (Chinese only supports 'default')"
+                        info="Select a style of output audio for the synthesised speech. (Chinese only supports 'default')",
                     )
 
                     gr.Markdown(
@@ -570,7 +607,9 @@ def ui():
                     )
 
                     # Generate button for V1
-                    generate_btn_v1 = gr.Button("Generate with OpenVoice V1", variant="primary")
+                    generate_btn_v1 = gr.Button(
+                        "Generate with OpenVoice V1", variant="primary"
+                    )
 
                 # OpenVoice V2 Tab
                 with gr.TabItem("OpenVoice V2 with MeloTTS") as v2_tab:
@@ -586,7 +625,7 @@ def ui():
                             ("Korean", "kr"),
                         ],
                         value="en",
-                        info="Select the language for text-to-speech generation"
+                        info="Select the language for text-to-speech generation",
                     )
 
                     speaker_accent = gr.Dropdown(
@@ -599,7 +638,7 @@ def ui():
                             ("Indian", "india"),
                         ],
                         value="default",
-                        info="Select the accent for the speaker (only applicable for English)"
+                        info="Select the accent for the speaker (only applicable for English)",
                     )
 
                     speed = gr.Slider(
@@ -608,7 +647,7 @@ def ui():
                         maximum=2.0,
                         value=1.0,
                         step=0.1,
-                        info="Adjust the speed of the generated speech"
+                        info="Adjust the speed of the generated speech",
                     )
 
                     gr.Markdown(
@@ -629,18 +668,41 @@ def ui():
 
                     # Add a button for downloading UniDic (for Japanese support)
                     with gr.Row():
-                        unidic_btn = gr.Button("Download UniDic Dictionary (Required for Japanese)", variant="secondary")
-                        unidic_output = gr.Textbox(label="UniDic Download Status", interactive=False)
+                        unidic_btn = gr.Button(
+                            "Download UniDic Dictionary (Required)",
+                            variant="secondary",
+                        )
+                        unidic_output = gr.Textbox(
+                            label="UniDic Download Status", interactive=False
+                        )
 
-                    # Set up the event handler for the UniDic button
-                    unidic_btn.click(
-                        fn=download_unidic,
-                        inputs=[],
-                        outputs=[unidic_output]
-                    )
+                        unidic_btn.click(
+                            fn=download_unidic, inputs=[], outputs=[unidic_output]
+                        )
+
+                    def download_nltk():
+                        import nltk
+
+                        nltk.download("averaged_perceptron_tagger_eng")
+                        return "Downloaded averaged_perceptron_tagger_eng"
+
+                    with gr.Row():
+                        nltk_btn = gr.Button(
+                            "Download averaged_perceptron_tagger_eng (Required)",
+                            variant="secondary",
+                        )
+                        nltk_output = gr.Textbox(
+                            label="nltk Download Status", interactive=False
+                        )
+
+                        nltk_btn.click(
+                            fn=download_nltk, inputs=[], outputs=[nltk_output]
+                        )
 
                     # Generate button for V2
-                    generate_btn_v2 = gr.Button("Generate with OpenVoice V2", variant="primary")
+                    generate_btn_v2 = gr.Button(
+                        "Generate with OpenVoice V2", variant="primary"
+                    )
 
             # Update speaker accent options based on language
             def update_accent_options(language):
@@ -655,20 +717,20 @@ def ui():
                         ],
                         value="default",
                         interactive=True,
-                        label="Speaker Accent"
+                        label="Speaker Accent",
                     )
                 else:
                     return gr.Dropdown(
                         choices=[("Default (Only option for non-English)", "default")],
                         value="default",
                         interactive=False,
-                        label="Speaker Accent (Not applicable for non-English languages)"
+                        label="Speaker Accent (Not applicable for non-English languages)",
                     )
 
             language_code.change(
                 fn=update_accent_options,
                 inputs=[language_code],
-                outputs=[speaker_accent]
+                outputs=[speaker_accent],
             )
 
             reference_audio = gr.Audio(
