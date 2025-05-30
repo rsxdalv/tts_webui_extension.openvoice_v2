@@ -239,6 +239,9 @@ def get_openvoice_models(model_name="camenduru/OpenVoice", use_v2=True):
 @decorator_extension_inner
 @log_function_time
 def tts_v1(text: str, style: str, reference_audio: str, language_code: str = "en", **kwargs):
+    if not reference_audio:
+        raise gr.Error("Please upload a reference audio file")
+
     """Run OpenVoice V1 text-to-speech generation"""
     models = get_openvoice_models(model_name="camenduru/OpenVoice", use_v2=False)
 
@@ -351,6 +354,9 @@ def tts_v1(text: str, style: str, reference_audio: str, language_code: str = "en
 @decorator_extension_inner
 @log_function_time
 def tts_v2(text: str, reference_audio: str, language_code: str = "en", speaker_accent: str = "default", speed: float = 1.0, **kwargs):
+    if not reference_audio:
+        raise gr.Error("Please upload a reference audio file")
+
     """Run OpenVoice V2 text-to-speech generation"""
     models = get_openvoice_models(model_name="rsxdalv/OpenVoiceV2", use_v2=True)
 
