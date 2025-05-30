@@ -3,7 +3,7 @@ import setuptools
 setuptools.setup(
     name="extension_openvoice_v2",
     packages=setuptools.find_namespace_packages(),
-    version="0.0.2",
+    version="0.0.3",
     author="rsxdalv",
     description="OpenVoice: A versatile instant voice cloning approach",
     url="https://github.com/rsxdalv/extension_openvoice_v2",

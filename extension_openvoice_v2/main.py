@@ -232,7 +232,7 @@ def get_openvoice_models(model_name="camenduru/OpenVoice", use_v2=True):
 @decorator_apply_torch_seed
 @decorator_save_metadata
 @decorator_save_wav
-@decorator_add_model_type("openvoice_v2")
+@decorator_add_model_type("openvoice")
 @decorator_add_base_filename
 @decorator_add_date
 @decorator_log_generation
@@ -240,7 +240,7 @@ def get_openvoice_models(model_name="camenduru/OpenVoice", use_v2=True):
 @log_function_time
 def tts_v1(text: str, style: str, reference_audio: str, language_code: str = "en", **kwargs):
     """Run OpenVoice V1 text-to-speech generation"""
-    models = get_openvoice_models(model_name="rsxdalv/OpenVoiceV2", use_v2=False)
+    models = get_openvoice_models(model_name="camenduru/OpenVoice", use_v2=False)
 
     # Validate text input
     if len(text) < 2:
