@@ -1,12 +1,12 @@
 import setuptools
 
 setuptools.setup(
-    name="extension_openvoice_v2",
+    name="tts_webui_extension.openvoice_v2",
     packages=setuptools.find_namespace_packages(),
     version="0.1.0",
     author="rsxdalv",
     description="OpenVoice: A versatile instant voice cloning approach",
-    url="https://github.com/rsxdalv/extension_openvoice_v2",
+    url="https://github.com/rsxdalv/tts_webui_extension.openvoice_v2",
     project_urls={},
     scripts=[],
     install_requires=[
@@ -23,3 +23,4 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
 )
+

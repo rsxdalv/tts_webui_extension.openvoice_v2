@@ -772,12 +772,6 @@ def ui():
                 - Additional languages: Spanish, French, Chinese, Japanese, Korean (each with default accent only)
                 - Adjustable speech speed
 
-                **Note:** Speaker accents are only available for English languages. For other languages,
-                only the default accent is available.
-
-                **Japanese Support:** For Japanese text-to-speech, you need to install the UniDic dictionary.
-                Use the "Download UniDic Dictionary" button in the OpenVoice V2 tab if you encounter errors
-                with Japanese text.
                 """
                 )
 
